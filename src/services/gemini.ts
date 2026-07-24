@@ -26,6 +26,6 @@ export const getGeminiResponse = async (userMessage: string): Promise<string> =>
     return response.text()
   } catch (error: any) {
     console.error("Gemini API Error:", error)
-    return \`Lỗi hệ thống: \${error.message} - (Key đang dùng: \${apiKey.substring(0, 15)}...) 🦊\`
+    return `Lỗi hệ thống: ${error.message} - (Key đang dùng: ${apiKey.substring(0, 15)}...) 🦊`
   }
 }
