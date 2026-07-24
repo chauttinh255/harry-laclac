@@ -18,7 +18,14 @@ export default function FlashCardPage() {
   const word = words[currentIndex]
 
   if (!topic || !word) {
-    return <div className="page"><p>Chủ đề không tồn tại</p></div>
+    return (
+      <div className="page" style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', textAlign: 'center'}}>
+        <span style={{fontSize: '4rem', marginBottom: '1rem'}}>🚧</span>
+        <h2>Chủ đề này đang được cập nhật...</h2>
+        <p style={{color: '#666', marginTop: '0.5rem'}}>Daddy Alex đang thêm từ vựng mới cho phần này nhé!</p>
+        <button onClick={() => navigate(-1)} style={{marginTop: '2rem', padding: '12px 24px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 600}}>Quay lại</button>
+      </div>
+    )
   }
 
   const next = () => {

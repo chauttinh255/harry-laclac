@@ -3,12 +3,12 @@ import { motion } from 'framer-motion'
 import './LessonPage.css'
 
 const units = [
-  { id: 'u1', name: 'Unit 1: Greetings', nameVi: 'Chào hỏi', icon: '👋', lessons: 3, completed: 2, color: '#4A90D9', topicId: 'school' },
+  { id: 'u1', name: 'Unit 1: Greetings', nameVi: 'Chào hỏi', icon: '👋', lessons: 3, completed: 2, color: '#4A90D9', topicId: 'numbers' },
   { id: 'u2', name: 'Unit 2: Animals', nameVi: 'Động vật', icon: '🐾', lessons: 4, completed: 1, color: '#FF6B35', topicId: 'animals' },
   { id: 'u3', name: 'Unit 3: Family', nameVi: 'Gia đình', icon: '👨‍👩‍👧‍👦', lessons: 3, completed: 0, color: '#E91E63', topicId: 'family' },
   { id: 'u4', name: 'Unit 4: Colors & Numbers', nameVi: 'Màu sắc & Số', icon: '🎨', lessons: 4, completed: 0, color: '#9B59B6', topicId: 'colors' },
   { id: 'u5', name: 'Unit 5: Food', nameVi: 'Đồ ăn', icon: '🍎', lessons: 3, completed: 0, color: '#2ECC71', topicId: 'food' },
-  { id: 'u6', name: 'Unit 6: My School', nameVi: 'Trường học', icon: '🏫', lessons: 4, completed: 0, color: '#00BCD4', topicId: 'school' },
+  { id: 'u6', name: 'Unit 6: My School', nameVi: 'Trường học', icon: '🏫', lessons: 4, completed: 0, color: '#00BCD4', topicId: 'colors' },
 ]
 
 export default function LessonPage() {
