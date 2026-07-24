@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { vocabularyData } from '../../data/vocabularyData'
+import { unlockAudioContext } from '../../services/audioCache'
 import './PronunciationPage.css'
 
 const allWords = Object.values(vocabularyData).flat()
@@ -20,8 +21,7 @@ export default function PronunciationPage() {
   }
 
   const startListening = () => {
-    const unlockAudio = new SpeechSynthesisUtterance('');
-    speechSynthesis.speak(unlockAudio);
+    unlockAudioContext();
 
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!SR) { 

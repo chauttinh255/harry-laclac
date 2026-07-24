@@ -8,6 +8,28 @@ const STATIC_CACHE: Record<string, string> = {
   "Listen and repeat after me": "/sounds/listen_repeat.mp3",
 }
 
+// Global Audio Element to bypass iOS autoplay restrictions
+let globalAudio: HTMLAudioElement | null = null;
+let isAudioUnlocked = false;
+
+export const unlockAudioContext = () => {
+  if (isAudioUnlocked) return;
+  if (!globalAudio) {
+    globalAudio = new Audio();
+  }
+  // Play a silent or empty source to unlock
+  globalAudio.src = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAEAAABIAD+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v7+AAAAAExhdmM1OC41NAAAAAAAAAAAAAAAACQAAAAAAAAAASAAAAAAAAD/zhAAAAAAAAAAAAAAABpIAAAAAAAA';
+  globalAudio.play().then(() => {
+    isAudioUnlocked = true;
+  }).catch(() => {
+    // Ignore errors for the silent track
+  });
+  
+  // Unlock SpeechSynthesis as well
+  const u = new SpeechSynthesisUtterance('');
+  speechSynthesis.speak(u);
+}
+
 // Fallback to Web Speech API
 const speakFallback = (text: string) => {
   const u = new SpeechSynthesisUtterance(text)
@@ -16,11 +38,18 @@ const speakFallback = (text: string) => {
   speechSynthesis.speak(u)
 }
 
+const playGlobalAudio = (url: string, fallbackText: string) => {
+  if (!globalAudio) {
+    globalAudio = new Audio();
+  }
+  globalAudio.src = url;
+  globalAudio.play().catch(() => speakFallback(fallbackText));
+}
+
 export const playAudio = async (text: string) => {
   // 1. Check static cache first
   if (STATIC_CACHE[text]) {
-    const audio = new Audio(STATIC_CACHE[text])
-    audio.play().catch(() => speakFallback(text))
+    playGlobalAudio(STATIC_CACHE[text], text);
     return
   }
 
@@ -36,8 +65,7 @@ export const playAudio = async (text: string) => {
       try {
         const testRes = await fetch(data.publicUrl, { method: 'HEAD' })
         if (testRes.ok) {
-          const audio = new Audio(data.publicUrl)
-          audio.play()
+          playGlobalAudio(data.publicUrl, text);
           return
         }
       } catch (e) {
@@ -50,8 +78,7 @@ export const playAudio = async (text: string) => {
     if (audioBlob) {
       // Play immediately
       const url = URL.createObjectURL(audioBlob)
-      const audio = new Audio(url)
-      audio.play()
+      playGlobalAudio(url, text);
 
       // Upload to cache in background
       supabase.storage.from('audio-cache').upload(fileName, audioBlob, {

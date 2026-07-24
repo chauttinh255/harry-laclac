@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getGeminiResponse } from '../../services/gemini'
-import { playAudio } from '../../services/audioCache'
+import { playAudio, unlockAudioContext } from '../../services/audioCache'
 import './AIChatPage.css'
 
 const greetings = [
@@ -42,8 +42,7 @@ export default function AIChatPage() {
 
   const startVoiceInput = () => {
     // 1. Unlock Audio Context on first interaction
-    const unlockAudio = new SpeechSynthesisUtterance('');
-    speechSynthesis.speak(unlockAudio);
+    unlockAudioContext();
 
     // 2. Start Speech Recognition
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition

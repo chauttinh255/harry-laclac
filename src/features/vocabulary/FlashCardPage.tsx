@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { topics, vocabularyData } from '../../data/vocabularyData'
 import { sounds } from '../../utils/soundManager'
-import { playAudio } from '../../services/audioCache'
+import { playAudio, unlockAudioContext } from '../../services/audioCache'
 import './FlashCardPage.css'
 
 export default function FlashCardPage() {
@@ -45,6 +45,7 @@ export default function FlashCardPage() {
     }
   }
   const speak = (text: string) => {
+    unlockAudioContext();
     playAudio(text)
   }
 
