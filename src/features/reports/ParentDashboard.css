@@ -1,0 +1,42 @@
+.report-header { margin-bottom: var(--sp-lg); }
+.report-header__back { background: none; font-weight: 700; color: var(--primary); margin-bottom: var(--sp-sm); display: block; }
+
+.report-student {
+  display: flex; align-items: center; gap: var(--sp-md);
+  background: var(--bg-gradient); color: white;
+  border-radius: var(--radius-xl); padding: var(--sp-lg) var(--sp-xl);
+  margin-bottom: var(--sp-lg);
+}
+.report-student__avatar {
+  width: 52px; height: 52px; border-radius: var(--radius-full);
+  background: rgba(255,255,255,0.25); display: flex;
+  align-items: center; justify-content: center; font-size: 1.8rem;
+}
+.report-student h2 { font-size: var(--fs-lg); font-weight: 800; }
+.report-student p { font-size: var(--fs-xs); opacity: 0.85; }
+
+.report-today { margin-bottom: var(--sp-lg); }
+.report-section-title { font-size: var(--fs-md); font-weight: 800; margin-bottom: var(--sp-md); }
+.report-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-sm); }
+.report-stat {
+  background: var(--bg-card); border-radius: var(--radius-md);
+  padding: var(--sp-md); text-align: center; box-shadow: var(--shadow-sm);
+  border-bottom: 3px solid var(--stat-color);
+}
+.report-stat__value { display: block; font-size: var(--fs-xl); font-weight: 900; color: var(--stat-color); }
+.report-stat__label { font-size: 0.65rem; color: var(--text-secondary); font-weight: 600; }
+
+.report-card {
+  background: var(--bg-card); border-radius: var(--radius-xl);
+  padding: var(--sp-xl); margin-bottom: var(--sp-lg); box-shadow: var(--shadow-card);
+}
+.report-chart { margin-top: var(--sp-sm); }
+
+.report-tips { display: flex; flex-direction: column; gap: var(--sp-sm); }
+.report-tip {
+  display: flex; align-items: flex-start; gap: var(--sp-md);
+  padding: var(--sp-md); background: var(--bg-main); border-radius: var(--radius-md);
+}
+.report-tip span { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+.report-tip p { font-size: var(--fs-sm); line-height: 1.5; color: var(--text-secondary); }
+.report-tip strong { color: var(--text-primary); }

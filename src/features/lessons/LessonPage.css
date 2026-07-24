@@ -1,0 +1,18 @@
+.lesson-list { display: flex; flex-direction: column; gap: var(--sp-sm); }
+.lesson-card {
+  display: flex; align-items: center; gap: var(--sp-md);
+  background: var(--bg-card); border-radius: var(--radius-lg);
+  padding: var(--sp-lg); box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--unit-color);
+  transition: var(--transition-spring); cursor: pointer;
+}
+.lesson-card:hover { transform: translateX(4px); box-shadow: var(--shadow-md); }
+.lesson-card__icon { font-size: 2rem; flex-shrink: 0; }
+.lesson-card__info { flex: 1; }
+.lesson-card__name { font-weight: 700; font-size: var(--fs-sm); }
+.lesson-card__name-vi { font-size: var(--fs-xs); color: var(--text-secondary); }
+.lesson-card__progress { display: flex; align-items: center; gap: var(--sp-sm); margin-top: var(--sp-sm); }
+.lesson-card__bar { flex: 1; height: 6px; background: #E8F0FE; border-radius: var(--radius-pill); overflow: hidden; }
+.lesson-card__fill { height: 100%; background: var(--unit-color); border-radius: var(--radius-pill); transition: width 0.5s ease; }
+.lesson-card__count { font-size: var(--fs-xs); font-weight: 700; color: var(--unit-color); white-space: nowrap; }
+.lesson-card__arrow { font-size: var(--fs-xl); color: var(--text-light); font-weight: 700; }
