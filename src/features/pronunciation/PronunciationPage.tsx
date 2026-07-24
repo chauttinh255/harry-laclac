@@ -20,8 +20,14 @@ export default function PronunciationPage() {
   }
 
   const startListening = () => {
+    const unlockAudio = new SpeechSynthesisUtterance('');
+    speechSynthesis.speak(unlockAudio);
+
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (!SR) { alert('Trình duyệt không hỗ trợ nhận diện giọng nói'); return }
+    if (!SR) { 
+      alert('Trình duyệt không hỗ trợ nhận diện giọng nói. Vui lòng dùng Chrome hoặc Safari.'); 
+      return 
+    }
 
     const recognition = new SR()
     recognition.lang = 'en-US'
@@ -38,9 +44,22 @@ export default function PronunciationPage() {
       const status = score >= 80 ? 'correct' : score >= 50 ? 'close' : 'incorrect'
       setResult({ text: spoken, score, status })
     }
-    recognition.onerror = () => { setIsListening(false); setResult({ text: '', score: 0, status: 'error' }) }
+    recognition.onerror = (e: any) => { 
+      setIsListening(false); 
+      if (e.error === 'not-allowed') {
+        setResult({ text: 'Vui lòng cấp quyền Micro', score: 0, status: 'error' })
+      } else {
+        setResult({ text: 'Không nghe được, thử lại nhé!', score: 0, status: 'error' })
+      }
+    }
     recognition.onend = () => setIsListening(false)
-    recognition.start()
+    
+    try {
+      recognition.start()
+    } catch (e) {
+      setIsListening(false)
+      setResult({ text: 'Lỗi khởi động Micro', score: 0, status: 'error' })
+    }
   }
 
   const stopListening = () => { recognitionRef.current?.stop(); setIsListening(false) }
@@ -71,7 +90,13 @@ export default function PronunciationPage() {
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
       >
-        <img src={word.image} alt={word.word} className="pron-word-card__image" style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '24px', marginBottom: '1rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+        <img 
+          src={word.image} 
+          alt={word.word} 
+          onError={(e) => { e.currentTarget.src = `https://placehold.co/400x400/FF9800/FFFFFF?text=${word.word}` }}
+          className="pron-word-card__image" 
+          style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '24px', marginBottom: '1rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} 
+        />
         <h2 className="pron-word-card__word">{word.word}</h2>
         <p className="pron-word-card__phonetic">{word.phonetic}</p>
         <p className="pron-word-card__meaning">{word.vietnameseMeaning}</p>

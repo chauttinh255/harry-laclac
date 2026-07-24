@@ -86,7 +86,13 @@ export default function FlashCardPage() {
           <div className="fc-card__inner">
             {/* Front */}
             <div className="fc-card__front">
-              <img src={word.image} alt={word.word} className="fc-card__image" style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '50%', marginBottom: '1rem', border: '4px solid white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+              <img 
+                src={word.image} 
+                alt={word.word} 
+                onError={(e) => { e.currentTarget.src = `https://placehold.co/400x400/FF9800/FFFFFF?text=${word.word}` }}
+                className="fc-card__image" 
+                style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '50%', marginBottom: '1rem', border: '4px solid white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} 
+              />
               <h2 className="fc-card__word">{word.word}</h2>
               <p className="fc-card__phonetic">{word.phonetic}</p>
               <button

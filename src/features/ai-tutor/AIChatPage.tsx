@@ -41,9 +41,14 @@ export default function AIChatPage() {
   }
 
   const startVoiceInput = () => {
+    // 1. Unlock Audio Context on first interaction
+    const unlockAudio = new SpeechSynthesisUtterance('');
+    speechSynthesis.speak(unlockAudio);
+
+    // 2. Start Speech Recognition
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!SR) {
-      alert("Trình duyệt của bạn không hỗ trợ nhận diện giọng nói. Vui lòng dùng Chrome hoặc Safari bản mới nhất.")
+      setAiSubtitle("Trình duyệt không hỗ trợ nhận diện giọng nói. Bé hãy dùng Chrome hoặc Safari nhé!");
       return
     }
     
@@ -69,12 +74,21 @@ export default function AIChatPage() {
       setIsListening(false)
     }
     
-    recognition.onerror = () => {
+    recognition.onerror = (event: any) => {
       setIsListening(false)
-      setUserSubtitle("Không nghe rõ, bé nhấn Mic để thử lại nhé!")
+      if (event.error === 'not-allowed') {
+        setUserSubtitle("Vui lòng cấp quyền sử dụng Micro cho trình duyệt nhé!");
+      } else {
+        setUserSubtitle("Không nghe rõ, bé nhấn Mic để thử lại nhé!");
+      }
     }
     
-    recognition.start()
+    try {
+      recognition.start()
+    } catch (e) {
+      setIsListening(false)
+      setUserSubtitle("Lỗi khởi động Micro. Thử lại nhé!");
+    }
   }
 
   const handleUserMessage = async (text: string) => {
