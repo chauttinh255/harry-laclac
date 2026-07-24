@@ -24,8 +24,8 @@ export const getGeminiResponse = async (userMessage: string): Promise<string> =>
     const result = await model.generateContent(userMessage)
     const response = await result.response
     return response.text()
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini API Error:", error)
-    return "Xin lỗi, hiện tại AI Tutor đang gặp chút sự cố. Bé thử lại sau nhé! 🦊"
+    return \`Lỗi hệ thống: \${error.message} - (Key đang dùng: \${apiKey.substring(0, 15)}...) 🦊\`
   }
 }
