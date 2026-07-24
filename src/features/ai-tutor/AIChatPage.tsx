@@ -1,156 +1,160 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import type { ChatMessage } from '../../types'
 import { getGeminiResponse } from '../../services/gemini'
 import { playAudio } from '../../services/audioCache'
 import './AIChatPage.css'
 
-// (System prompt is now in services/gemini.ts)
-
 const greetings = [
-  "Hello! 👋 It's Daddy! Are you ready to learn some English with me?",
-  "Hi my little angels! 🌟 Ready to practice English today? Let's start with something fun!",
-  "Welcome back! 🎉 Daddy missed you! Shall we practice some new words together?",
+  "Hello! It's Daddy! Are you ready to learn some English with me?",
+  "Hi my little angels! Ready to practice English today?",
+  "Welcome back! Daddy missed you! Shall we practice some new words together?",
 ]
 
 export default function AIChatPage() {
   const navigate = useNavigate()
-  const [messages, setMessages] = useState<ChatMessage[]>([{
-    id: '0', role: 'assistant',
-    content: greetings[Math.floor(Math.random() * greetings.length)],
-    timestamp: Date.now(),
-  }])
-  const [input, setInput] = useState('')
-  const [isTyping, setIsTyping] = useState(false)
-  const [isVoiceMode, setIsVoiceMode] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [aiSubtitle, setAiSubtitle] = useState('')
+  const [userSubtitle, setUserSubtitle] = useState('')
+  const [isSpeaking, setIsSpeaking] = useState(false)
+  const [isListening, setIsListening] = useState(false)
+  const [isThinking, setIsThinking] = useState(false)
 
+  // Initialize with a greeting
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    const greeting = greetings[Math.floor(Math.random() * greetings.length)]
+    setAiSubtitle(greeting)
+    // Wait a little bit before speaking
+    setTimeout(() => {
+      setIsSpeaking(true)
+      speak(greeting)
+    }, 500)
+  }, [])
 
   const speak = (text: string) => {
     const clean = text.replace(/[\u{1F600}-\u{1F9FF}]/gu, '').trim()
     playAudio(clean)
-  }
-
-  const sendMessage = async (text: string) => {
-    if (!text.trim()) return
-
-    const userMsg: ChatMessage = {
-      id: Date.now().toString(), role: 'user',
-      content: text, timestamp: Date.now(),
-    }
-    setMessages(prev => [...prev, userMsg])
-    setInput('')
-    setIsTyping(true)
-
-    // Call Gemini API
-    const aiResponseText = await getGeminiResponse(text)
-    
-    const aiMsg: ChatMessage = {
-      id: (Date.now() + 1).toString(), role: 'assistant',
-      content: aiResponseText,
-      timestamp: Date.now(),
-    }
-    setMessages(prev => [...prev, aiMsg])
-    setIsTyping(false)
-    speak(aiMsg.content)
+    // Roughly estimate when speaking is done
+    const speakingDuration = Math.max(2000, clean.split(' ').length * 350)
+    setTimeout(() => {
+      setIsSpeaking(false)
+    }, speakingDuration)
   }
 
   const startVoiceInput = () => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    if (!SR) return
+    if (!SR) {
+      alert("Trình duyệt của bạn không hỗ trợ nhận diện giọng nói. Vui lòng dùng Chrome hoặc Safari bản mới nhất.")
+      return
+    }
+    
+    // Stop any current speaking
+    setIsSpeaking(false)
+    
     const recognition = new SR()
     recognition.lang = 'en-US'
-    recognition.onstart = () => setIsVoiceMode(true)
+    
+    recognition.onstart = () => {
+      setIsListening(true)
+      setUserSubtitle("Đang nghe...")
+      setAiSubtitle("")
+    }
+    
     recognition.onresult = (e: any) => {
       const text = e.results[0][0].transcript
-      setInput(text)
-      sendMessage(text)
+      setUserSubtitle(text)
+      handleUserMessage(text)
     }
-    recognition.onend = () => setIsVoiceMode(false)
-    recognition.onerror = () => setIsVoiceMode(false)
+    
+    recognition.onend = () => {
+      setIsListening(false)
+    }
+    
+    recognition.onerror = () => {
+      setIsListening(false)
+      setUserSubtitle("Không nghe rõ, bé nhấn Mic để thử lại nhé!")
+    }
+    
     recognition.start()
   }
 
+  const handleUserMessage = async (text: string) => {
+    setIsThinking(true)
+    
+    try {
+      const aiResponseText = await getGeminiResponse(text)
+      setIsThinking(false)
+      setAiSubtitle(aiResponseText)
+      setIsSpeaking(true)
+      speak(aiResponseText)
+    } catch (error) {
+      setIsThinking(false)
+      setAiSubtitle("Xin lỗi, Daddy đang bận một chút, con gọi lại sau nhé!")
+    }
+  }
+
   return (
-    <div className="ai-chat" id="ai-chat-page">
+    <div className="voice-call-page" id="ai-chat-page">
       {/* Header */}
-      <div className="ai-chat__header">
-        <button className="ai-chat__back" onClick={() => navigate('/home')}>←</button>
-        <div className="ai-chat__header-info">
-          <div className="ai-chat__avatar">
-            <img src="/assets/laclac.png" alt="LacLac" style={{width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%'}} />
-          </div>
-          <div>
-            <h2 className="ai-chat__name">Daddy (Alex)</h2>
-            <span className="ai-chat__status">● Đang hoạt động</span>
+      <div className="voice-call__header">
+        <button className="voice-call__back" onClick={() => navigate('/home')}>←</button>
+        <span className="voice-call__status">{isListening ? 'Đang nghe...' : isThinking ? 'Đang suy nghĩ...' : 'Đang hoạt động'}</span>
+      </div>
+
+      {/* Main Call Area */}
+      <div className="voice-call__main">
+        <div className={`voice-call__avatar-container ${(isSpeaking || isListening) ? 'active' : ''}`}>
+          <div className="voice-call__pulse-ring ring-1"></div>
+          <div className="voice-call__pulse-ring ring-2"></div>
+          <div className="voice-call__pulse-ring ring-3"></div>
+          
+          <div className="voice-call__avatar">
+            <img src="/assets/laclac.png" alt="Daddy Alex" />
           </div>
         </div>
+        
+        <h2 className="voice-call__name">Daddy (Alex)</h2>
       </div>
 
-      {/* Messages */}
-      <div className="ai-chat__messages">
-        <AnimatePresence>
-          {messages.map((msg) => (
-            <motion.div
-              key={msg.id}
-              className={`ai-chat__msg ai-chat__msg--${msg.role}`}
-              initial={{ y: 20, opacity: 0, scale: 0.95 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              transition={{ type: 'spring', damping: 25 }}
+      {/* Subtitles Area */}
+      <div className="voice-call__subtitles">
+        <AnimatePresence mode="wait">
+          {userSubtitle && (
+            <motion.div 
+              key={`user-${userSubtitle}`}
+              className="subtitle subtitle--user"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
             >
-              {msg.role === 'assistant' && <img src="/assets/laclac.png" alt="LacLac" className="ai-chat__msg-avatar" style={{width: '32px', height: '32px', objectFit: 'contain', borderRadius: '50%'}} />}
-              <div className="ai-chat__msg-bubble">
-                <p>{msg.content}</p>
-                {msg.role === 'assistant' && (
-                  <button className="ai-chat__msg-speak" onClick={() => speak(msg.content)}>🔊</button>
-                )}
-              </div>
+              "{userSubtitle}"
             </motion.div>
-          ))}
+          )}
         </AnimatePresence>
-
-        {isTyping && (
-          <motion.div
-            className="ai-chat__msg ai-chat__msg--assistant"
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          >
-            <img src="/assets/laclac.png" alt="LacLac" className="ai-chat__msg-avatar" style={{width: '32px', height: '32px', objectFit: 'contain', borderRadius: '50%'}} />
-            <div className="ai-chat__msg-bubble ai-chat__typing">
-              <span /><span /><span />
-            </div>
-          </motion.div>
-        )}
-        <div ref={messagesEndRef} />
+        
+        <AnimatePresence mode="wait">
+          {aiSubtitle && (
+            <motion.div 
+              key={`ai-${aiSubtitle}`}
+              className="subtitle subtitle--ai"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              {aiSubtitle}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Input */}
-      <div className="ai-chat__input-area">
-        <motion.button
-          className={`ai-chat__voice-btn ${isVoiceMode ? 'active' : ''}`}
+      {/* Controls */}
+      <div className="voice-call__controls">
+        <button 
+          className={`voice-call__mic-btn ${isListening ? 'listening' : ''}`}
           onClick={startVoiceInput}
-          animate={isVoiceMode ? { scale: [1, 1.1, 1] } : {}}
-          transition={{ repeat: Infinity, duration: 1 }}
         >
           🎤
-        </motion.button>
-        <input
-          className="ai-chat__input"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
-          placeholder="Nhắn tin hoặc nhấn 🎤 để nói..."
-        />
-        <button
-          className="ai-chat__send-btn"
-          onClick={() => sendMessage(input)}
-          disabled={!input.trim()}
-        >
-          ➤
         </button>
+        <p className="voice-call__hint">Nhấn để nói chuyện với Daddy</p>
       </div>
     </div>
   )

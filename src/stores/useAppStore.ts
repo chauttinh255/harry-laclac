@@ -15,6 +15,7 @@ interface AppState {
   addMinutes: (mins: number) => void
   recordPronunciation: (score: number) => void
   setLevel: (level: LevelId) => void
+  updateUser: (data: Partial<UserProfile>) => void
   syncToSupabase: () => Promise<void>
 }
 
@@ -91,6 +92,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   })),
   setLevel: (level) => set((s) => ({
     user: { ...s.user, level },
+  })),
+  updateUser: (data) => set((s) => ({
+    user: { ...s.user, ...data },
   })),
   syncToSupabase: async () => {
     // This function can be called periodically or after major state changes

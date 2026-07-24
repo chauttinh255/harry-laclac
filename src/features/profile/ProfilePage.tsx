@@ -1,10 +1,19 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAppStore } from '../../stores/useAppStore'
 import './ProfilePage.css'
 
 export default function ProfilePage() {
-  const { user, badges } = useAppStore()
+  const { user, badges, updateUser } = useAppStore()
+  const [isEditing, setIsEditing] = useState(false)
+  const [editName, setEditName] = useState(user.name)
+  const [editAge, setEditAge] = useState(user.age.toString())
+
+  const handleSave = () => {
+    updateUser({ name: editName, age: parseInt(editAge) || user.age })
+    setIsEditing(false)
+  }
 
   return (
     <div className="page profile-page" id="profile-page">
@@ -13,13 +22,42 @@ export default function ProfilePage() {
         <div className="profile-card__avatar">
           <img src={user.avatar} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%', padding: '4px' }} />
         </div>
-        <h1 className="profile-card__name">{user.name}</h1>
-        <p className="profile-card__level">Level {user.level} · {user.age} tuổi</p>
-        <div className="profile-card__stats">
-          <div><strong>{user.streak}</strong><span>🔥 Streak</span></div>
-          <div><strong>{user.xp}</strong><span>⚡ XP</span></div>
-          <div><strong>{user.coins}</strong><span>⭐ Sao</span></div>
-        </div>
+        
+        {isEditing ? (
+          <div className="profile-card__edit-form">
+            <input 
+              type="text" 
+              value={editName} 
+              onChange={(e) => setEditName(e.target.value)} 
+              className="profile-input" 
+              placeholder="Tên bé" 
+            />
+            <input 
+              type="number" 
+              value={editAge} 
+              onChange={(e) => setEditAge(e.target.value)} 
+              className="profile-input" 
+              placeholder="Tuổi" 
+            />
+            <div className="profile-card__edit-actions">
+              <button className="btn btn--outline" onClick={() => setIsEditing(false)}>Hủy</button>
+              <button className="btn btn--primary" onClick={handleSave}>Lưu</button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <h1 className="profile-card__name">
+              {user.name} 
+              <button className="profile-card__edit-btn" onClick={() => setIsEditing(true)}>✏️</button>
+            </h1>
+            <p className="profile-card__level">Level {user.level} · {user.age} tuổi</p>
+            <div className="profile-card__stats">
+              <div><strong>{user.streak}</strong><span>🔥 Streak</span></div>
+              <div><strong>{user.xp}</strong><span>⚡ XP</span></div>
+              <div><strong>{user.coins}</strong><span>⭐ Sao</span></div>
+            </div>
+          </>
+        )}
       </motion.div>
 
       {/* Badges */}
